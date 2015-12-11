@@ -90,6 +90,7 @@
 
     <scm>
         <url>https://github.com/sannies/ismv-server</url>
+        <connection>scm:git:git@github.com:sannies/ismv-server.git</connection>
     </scm>
 
     <licenses>
