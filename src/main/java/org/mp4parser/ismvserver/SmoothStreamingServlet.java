@@ -44,6 +44,8 @@ import java.util.regex.Pattern;
 public class SmoothStreamingServlet extends HttpServlet {
     private File dataDir;
 
+    Pattern clientAccess = Pattern.compile("^/clientaccesspolicy\\.xml$");
+    Pattern crossDomain = Pattern.compile("^/crossdomain\\.xml$");
     Pattern manifestPattern = Pattern.compile("^/(.*)/(.*\\.ism)/Manifest$");
     Pattern segmentPattern = Pattern.compile("^/(.*)/(.*\\.ism)/QualityLevels\\((.*)\\)/Fragments\\((.*)=(.*)\\)$");
 
@@ -162,6 +164,16 @@ public class SmoothStreamingServlet extends HttpServlet {
                 }
 
 
+            }
+            m = clientAccess.matcher(req.getPathInfo());
+            if (m.matches()) {
+                IOUtils.copy(SmoothStreamingServlet.class.getResourceAsStream("/clientaccesspolicy.xml"), resp.getOutputStream());
+                return;
+            }
+            m = crossDomain.matcher(req.getPathInfo());
+            if (m.matches()) {
+                IOUtils.copy(SmoothStreamingServlet.class.getResourceAsStream("/crossdomain.xml"), resp.getOutputStream());
+                return;
             }
         } catch (XPathExpressionException e) {
             e.printStackTrace();
