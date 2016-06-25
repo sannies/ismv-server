@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
  * Created by sannies on 10.12.2015.
  */
 public class SmoothStreamingServlet extends HttpServlet {
+
     private File dataDir;
 
     Pattern clientAccess = Pattern.compile("^/clientaccesspolicy\\.xml$");
@@ -91,6 +92,7 @@ public class SmoothStreamingServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("req: " + req);
         try {
             Matcher m = manifestPattern.matcher(req.getPathInfo());
             if (m.matches()) {
@@ -104,6 +106,7 @@ public class SmoothStreamingServlet extends HttpServlet {
                 resp.setContentType("application/vnd.ms-sstr+xml");
                 resp.setContentLength(clientManifest.length);
                 resp.getOutputStream().write(clientManifest);
+
                 return;
             }
             m = segmentPattern.matcher(req.getPathInfo());
@@ -112,6 +115,11 @@ public class SmoothStreamingServlet extends HttpServlet {
                 Document d = parseXml(f);
                 Node item = (Node) getXPath().evaluate(
                         "smil/body/switch/*[@systemBitrate='" + m.group(3) + "']/param[@name='trackName'][@value='" + m.group(4) + "']/..", d, XPathConstants.NODE);
+                if (item == null) {
+                    item = (Node) getXPath().evaluate(
+                            "smil/body/switch/" + m.group(4) + "[@systemBitrate='" + m.group(3) + "']", d, XPathConstants.NODE);
+
+                }
                 String src = item.getAttributes().getNamedItem("src").getTextContent();
                 long time = Long.parseLong(m.group(5));
                 long trackId = Long.parseLong((String) getXPath().evaluate("param[@name='trackID']/@value", item, XPathConstants.STRING));
